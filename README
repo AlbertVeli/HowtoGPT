@@ -1,4 +1,4 @@
-Simple openai chatcompletion python script.
+Simple openai chatcompletion python script based on https://gynvael.coldwind.pl/?lang=en&id=771
 
 $ ./howtogpt.py -h
 
