@@ -77,7 +77,6 @@ def parse_opts():
     for opt, arg in opts:
         if opt == '-h':
             print_help()
-            sys.exit(0)
         elif opt == '-r':
             mode = 'raw'
         elif opt in ('-m', '--mode'):
