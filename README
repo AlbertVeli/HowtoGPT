@@ -16,13 +16,11 @@ Usage: ./howtogpt.py [-h] [-r] [-m <system>] <question>
   $ ./howtogpt.py -m powershell reverse lines in one file
   Get-Content -Path "file.txt" | Select-Object -Reverse | Set-Content -Path "reversed.txt"
 
-  $ ./howtogpt.py -r What do you know about the japanese wwii unit 731?
-  Unit 731 was a covert biological and chemical warfare research unit of the Imperial Japanese
-  Army during World War II. It conducted unethical human experimentation on prisoners, including
-  infecting them with deadly diseases to study their effects. This included vivisections, frostbite
-  studies, and testing various weapons. The unit's activities were kept classified until the end
-  of the war, and those involved largely evaded prosecution in exchange for sharing their research
-  with the Allies.
+  $ ./howtogpt.py -r describe the gecos field in a unix password file
+  The GECOS field in a Unix password file contains general information about a user. It
+  typically includes the user's full name, contact information, office location, and
+  other optional details. This field is primarily used for administrative purposes and
+  may vary depending on the Unix system in use.
 
 
 LICENSE

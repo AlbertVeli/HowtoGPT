@@ -56,13 +56,11 @@ def print_help():
     print(f'  $ {sys.argv[0]} -m powershell reverse lines in one file')
     print('  Get-Content -Path "file.txt" | Select-Object -Reverse | Set-Content -Path "reversed.txt"')
     print('')
-    print(f'  $ {sys.argv[0]} -r What do you know about the japanese wwii unit 731?')
-    print('  Unit 731 was a covert biological and chemical warfare research unit of the Imperial Japanese')
-    print('  Army during World War II. It conducted unethical human experimentation on prisoners, including')
-    print('  infecting them with deadly diseases to study their effects. This included vivisections, frostbite')
-    print('  studies, and testing various weapons. The unit\'s activities were kept classified until the end')
-    print('  of the war, and those involved largely evaded prosecution in exchange for sharing their research')
-    print('  with the Allies.')
+    print(f'  $ {sys.argv[0]} -r describe the gecos field in a unix password file')
+    print('  The GECOS field in a Unix password file contains general information about a user. It')
+    print('  typically includes the user\'s full name, contact information, office location, and')
+    print('  other optional details. This field is primarily used for administrative purposes and')
+    print('  may vary depending on the Unix system in use.')
     sys.exit(1)
 
 # parse options
