@@ -22,6 +22,16 @@ Usage: ./howtogpt.py [-h] [-r] [-m <system>] <question>
   other optional details. This field is primarily used for administrative purposes and
   may vary depending on the Unix system in use.
 
+  # Create symlink to howtogpt.py in ~/bin
+  $ cd ~/bin
+  $ ln -s <path to howtogpt.py> howto
+  # Make sure ~/bin is in $PATH
+  $ echo $PATH | tr ':' '\n' | grep $HOME
+  /home/albert/bin
+  # now howto can be run from any directory
+  $ howto convert heic image to png
+  heif-convert image.heic image.png
+
 
 LICENSE
 
