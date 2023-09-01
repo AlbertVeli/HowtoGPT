@@ -28,9 +28,19 @@ Usage: ./howtogpt.py [-h] [-r] [-m <system>] <question>
   # Make sure ~/bin is in $PATH
   $ echo $PATH | tr ':' '\n' | grep $HOME
   /home/albert/bin
+
   # now howto can be run from any directory
   $ howto convert heic image to png
   heif-convert image.heic image.png
+
+  $ howto -r what are the fundamental axioms in mathematical proofs
+  The fundamental axioms vary depending on the branch of mathematics. However, some common axioms include:
+
+  1. Peano axioms: These axioms define the properties of natural numbers, such as the existence of zero, successor function, and induction principle.
+  2. Euclidean axioms: These axioms describe the properties of plane geometry, including the existence of points, lines, and angles.
+  3. Field axioms: These axioms define the properties of arithmetic operations and algebraic structures like groups, rings, and fields.
+  4. Zermelo-Fraenkel set theory axioms: These axioms provide a foundation for set theory, including principles of existence, extensionality, and power sets.
+  5. Continuum axioms: These axioms describe properties of real numbers, including completeness and the least upper bound property.
 
 
 LICENSE
