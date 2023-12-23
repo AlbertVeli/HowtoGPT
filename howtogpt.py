@@ -4,19 +4,23 @@
 # which in turn is based on the openai examples:
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb
 
-import openai
+from openai import OpenAI
 import sys
 import os
 import getopt
 
+client = None
+
 def load_secrets():
+    global client
     dir_path = os.path.dirname(os.path.realpath(__file__))
     # https://platform.openai.com/account/api-keys
     # Do not check in secrets, put these in .gitignore
     with open(f'{dir_path}/api_key.txt') as f:
-        openai.api_key = f.read().strip()
+        key = f.read().strip()
     with open(f'{dir_path}/api_organization.txt') as f:
-        openai.organization = f.read().strip()
+        org = f.read().strip()
+        client = OpenAI(api_key = key, organization = org)
 
 # Uses global variable mode (set by parse_opts)
 def do_question(s):
@@ -32,13 +36,10 @@ def do_question(s):
 
     user = prompt + s
 
-    ret = openai.ChatCompletion.create(
-            model = m,
-            messages = [ {'role': 'system', 'content': system}, {'role': 'user', 'content': user} ]
-            )
-    text = ret['choices'][0]['message']['content']
-    if text.startswith('`') and text.endswith('`'):
-        text = text[1:-1]
+    ret = client.chat.completions.create(model = m,
+    messages = [ {'role': 'system', 'content': system}, {'role': 'user', 'content': user} ])
+    md = ret.model_dump()
+    text = md['choices'][0]['message']['content']
     return text
 
 def print_help():
