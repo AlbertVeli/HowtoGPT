@@ -24,8 +24,8 @@ def load_secrets():
 
 # Uses global variable mode (set by parse_opts)
 def do_question(s):
-    m = 'gpt-3.5-turbo'
-    # m = 'gpt-4'
+    #m = 'gpt-3.5-turbo'
+    m = 'gpt-4o'
     system = 'You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.'
 
     if mode == 'raw':
