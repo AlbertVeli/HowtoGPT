@@ -4,35 +4,48 @@
 # which in turn is based on the openai examples:
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb
 
-from openai import OpenAI
-import sys
 import os
+import sys
 import getopt
+try:
+    from openai import OpenAI
+except ImportError:
+    print('Please install openai with "apt install python3-openai" or pip')
+    sys.exit(1)
+try:
+    from dotenv import dotenv_values
+except ImportError:
+    print('Please install python-dotenv with "apt install python3-dotenv" or pip')
+    sys.exit(1)
 
 client = None
 
 def load_secrets():
     global client
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    # https://platform.openai.com/account/api-keys
-    # Do not check in secrets, put these in .gitignore
-    with open(f'{dir_path}/api_key.txt') as f:
-        key = f.read().strip()
-    with open(f'{dir_path}/api_organization.txt') as f:
-        org = f.read().strip()
-        client = OpenAI(api_key = key, organization = org)
+    # Load API key and organization from .env file
+    # Don't forget to add .env to your .gitignore file
+    path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+    if not os.path.exists(path + '.env'):
+        print('Please create a .env file with your OpenAI API key and organization')
+        sys.exit(1)
+    config = dotenv_values(path + ".env")
+    client = OpenAI(api_key = config['OPENAI_API_KEY'],
+                    organization = config['OPENAI_ORGANIZATION'])
+    if client is None:
+        print('Could not load valid OpenAI API key and organization from .env file')
+        sys.exit(1)
 
 # Uses global variable mode (set by parse_opts)
 def do_question(s):
     #m = 'gpt-3.5-turbo'
     m = 'gpt-4o'
-    system = 'You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.'
+    system = 'You are a CLI assistant. Provide only the command, no explanations or extra text.'
 
     if mode == 'raw':
         prompt = ''
     else:
-        # mode cmdline
-        prompt = f'Answer with only the actual command without any intro or explanation. What is the {mode} command line command to '
+        # mode cmdline (default is Ubuntu)
+        prompt = f'Provide the {mode} command-line command to '
 
     user = prompt + s
 
@@ -40,6 +53,17 @@ def do_question(s):
     messages = [ {'role': 'system', 'content': system}, {'role': 'user', 'content': user} ])
     md = ret.model_dump()
     text = md['choices'][0]['message']['content']
+    # Clean up answer text
+    text = text.strip()
+    if text.startswith('``'):
+        # Remove first line which starts with ``
+        # or ```bash or similar, cmd is in the next line
+        lines = text.split('\n')
+        if len(lines) > 1:
+            text = lines[1]
+    if text[0] == '`' or text[0] == '"' or text[0] == "'":
+        # Remove quotes
+        text = text[1:-1]
     return text
 
 def print_help():
@@ -47,7 +71,7 @@ def print_help():
     print('')
     print('  Use -m raw (or -r) for a raw question or')
     print('  the name of any system for a cmdline.')
-    print('  Default value is "ubuntu".')
+    print('  Default value is "Ubuntu".')
     print('')
     print('  EXAMPLES')
     print('')
@@ -91,4 +115,5 @@ def parse_opts():
 args = parse_opts()
 load_secrets()
 
-print(do_question(' '.join(args)))
+answer = do_question(' '.join(args))
+print(answer)
