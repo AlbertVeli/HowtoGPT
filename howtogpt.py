@@ -4,93 +4,69 @@
 # which in turn is based on the openai examples:
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb
 
-import os
 import sys
 import getopt
+from pathlib import Path
 try:
     from openai import OpenAI
 except ImportError:
-    print('Please install openai with "apt install python3-openai" or pip')
-    sys.exit(1)
+    sys.exit('Please install openai with "apt install python3-openai" or pip')
 try:
     from dotenv import dotenv_values
 except ImportError:
-    print('Please install python-dotenv with "apt install python3-dotenv" or pip')
-    sys.exit(1)
+    sys.exit('Please install python-dotenv with "apt install python3-dotenv" or pip')
 
-client = None
+def load_client():
+    env_path = Path(__file__).parent / '.env'
+    try:
+        config = dotenv_values(env_path)
+    except Exception:
+        sys.exit('Please create a .env file with your OpenAI API key and organization')
+    if 'OPENAI_API_KEY' not in config or 'OPENAI_ORGANIZATION' not in config:
+        sys.exit('Missing OPENAI_API_KEY or OPENAI_ORGANIZATION in .env')
+    return OpenAI(api_key=config['OPENAI_API_KEY'], organization=config['OPENAI_ORGANIZATION'])
 
-def load_secrets():
-    global client
-    # Load API key and organization from .env file
-    # Don't forget to add .env to your .gitignore file
-    path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    if not os.path.exists(path + '.env'):
-        print('Please create a .env file with your OpenAI API key and organization')
-        sys.exit(1)
-    config = dotenv_values(path + ".env")
-    client = OpenAI(api_key = config['OPENAI_API_KEY'],
-                    organization = config['OPENAI_ORGANIZATION'])
-    if client is None:
-        print('Could not load valid OpenAI API key and organization from .env file')
-        sys.exit(1)
-
-# Uses global variable mode (set by parse_opts)
-def do_question(s):
-    #m = 'gpt-3.5-turbo'
-    m = 'gpt-4o'
+def do_question(client, s, mode):
     system = 'You are a CLI assistant. Provide only the command, no explanations or extra text.'
+    prompt = '' if mode == 'raw' else f'Provide the {mode} command-line command to '
 
-    if mode == 'raw':
-        prompt = ''
-    else:
-        # mode cmdline (default is Ubuntu)
-        prompt = f'Provide the {mode} command-line command to '
-
-    user = prompt + s
-
-    ret = client.chat.completions.create(model = m,
-    messages = [ {'role': 'system', 'content': system}, {'role': 'user', 'content': user} ])
-    md = ret.model_dump()
-    text = md['choices'][0]['message']['content']
-    # Clean up answer text
-    text = text.strip()
+    ret = client.chat.completions.create(
+        model='gpt-5.2',
+        messages=[{'role': 'system', 'content': system}, {'role': 'user', 'content': prompt + s}])
+    text = ret.choices[0].message.content.strip()
     if text.startswith('``'):
-        # Remove first line which starts with ``
-        # or ```bash or similar, cmd is in the next line
+        # Remove opening ```bash or similar fence; command is on the next line
         lines = text.split('\n')
         if len(lines) > 1:
             text = lines[1]
-    if text[0] == '`' or text[0] == '"' or text[0] == "'":
-        # Remove quotes
+    if len(text) > 2 and text[0] in '`"\'':
         text = text[1:-1]
     return text
 
 def print_help():
-    print(f'Usage: {sys.argv[0]} [-h] [-r] [-m <system>] <question>')
-    print('')
-    print('  Use -m raw (or -r) for a raw question or')
-    print('  the name of any system for a cmdline.')
-    print('  Default value is "Ubuntu".')
-    print('')
-    print('  EXAMPLES')
-    print('')
-    print(f'  $ {sys.argv[0]} reverse lines in one file')
-    print('  tac <filename>')
-    print('')
-    print(f'  $ {sys.argv[0]} -m powershell reverse lines in one file')
-    print('  Get-Content -Path "file.txt" | Select-Object -Reverse | Set-Content -Path "reversed.txt"')
-    print('')
-    print(f'  $ {sys.argv[0]} -r describe the gecos field in a unix password file')
-    print('  The GECOS field in a Unix password file contains general information about a user. It')
-    print('  typically includes the user\'s full name, contact information, office location, and')
-    print('  other optional details. This field is primarily used for administrative purposes and')
-    print('  may vary depending on the Unix system in use.')
+    print(f"""\
+Usage: {sys.argv[0]} [-h] [-r] [-m <system>] <question>
+
+  Use -m raw (or -r) for a raw question or
+  the name of any system for a cmdline.
+  Default value is "Ubuntu".
+
+  EXAMPLES
+
+  $ {sys.argv[0]} reverse lines in one file
+  tac <filename>
+
+  $ {sys.argv[0]} -m powershell reverse lines in one file
+  Get-Content -Path "file.txt" | Select-Object -Reverse | Set-Content -Path "reversed.txt"
+
+  $ {sys.argv[0]} -r describe the gecos field in a unix password file
+  The GECOS field in a Unix password file contains general information about a user. It
+  typically includes the user's full name, contact information, office location, and
+  other optional details. This field is primarily used for administrative purposes and
+  may vary depending on the Unix system in use.""")
     sys.exit(1)
 
-# parse options
 def parse_opts():
-    global mode
     mode = 'ubuntu'
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hrm:', ['mode='])
@@ -104,16 +80,13 @@ def parse_opts():
             mode = 'raw'
         elif opt in ('-m', '--mode'):
             mode = arg
-    if len(args) == 0:
+    if not args:
         print_help()
 
-    return args
+    return mode, args
 
 # --- main ---
 
-# args = arguments left after parsing flags
-args = parse_opts()
-load_secrets()
-
-answer = do_question(' '.join(args))
-print(answer)
+mode, args = parse_opts()
+client = load_client()
+print(do_question(client, ' '.join(args), mode))
