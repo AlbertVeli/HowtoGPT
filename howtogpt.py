@@ -17,7 +17,7 @@ except ImportError:
     sys.exit('Please install python-dotenv with "apt install python3-dotenv" or pip')
 
 def load_client():
-    env_path = Path(__file__).parent / '.env'
+    env_path = Path(__file__).resolve().parent / '.env'
     try:
         config = dotenv_values(env_path)
     except Exception:
