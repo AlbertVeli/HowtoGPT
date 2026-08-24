@@ -21,10 +21,10 @@ def load_client():
     try:
         config = dotenv_values(env_path)
     except Exception:
-        sys.exit('Please create a .env file with your OpenAI API key and organization')
-    if 'OPENAI_API_KEY' not in config or 'OPENAI_ORGANIZATION' not in config:
-        sys.exit('Missing OPENAI_API_KEY or OPENAI_ORGANIZATION in .env')
-    return OpenAI(api_key=config['OPENAI_API_KEY'], organization=config['OPENAI_ORGANIZATION'])
+        sys.exit('Please create a .env file with your OpenAI API key')
+    if 'OPENAI_API_KEY' not in config:
+        sys.exit('Missing OPENAI_API_KEY in .env')
+    return OpenAI(api_key=config['OPENAI_API_KEY'])
 
 def do_question(client, s, mode):
     system = 'You are a CLI assistant. Provide only the command, no explanations or extra text.'
